@@ -5,7 +5,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: "#030014",
+        primary: "#15498B",
         secondary: "#151312",
         ratingBox: "#221F3D",
         searchBar: "#0F0D23",
