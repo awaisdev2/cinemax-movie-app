@@ -1,38 +1,50 @@
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, { useState } from "react";
+import FontAwesome6 from '@expo/vector-icons/FontAwesome6';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
+import React, { useState } from 'react';
 import {
-    Alert,
-    Image,
-    KeyboardAvoidingView,
-    Modal,
-    Platform,
-    ScrollView,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-} from "react-native";
-import { WebView } from "react-native-webview";
+  ActivityIndicator,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import { WebView } from 'react-native-webview';
+import { PublicRoute } from '../../components/ProtectedRoute';
+import { useLogin } from '../../hooks/useAuthMutation';
 
 const Login = () => {
-  const [email, setEmail] = useState<any>("");
-  const [password, setPassword] = useState<any>("");
-  const [showWebView, setShowWebView] = useState<any>(false);
-  const [webViewUrl, setWebViewUrl] = useState<any>("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showWebView, setShowWebView] = useState(false);
+  const [webViewUrl, setWebViewUrl] = useState('');
+  
+  const { mutate: login, isPending: isLoading } = useLogin();
 
-  const handleLogin = async () => {
+  const handleLogin = () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password");
+      Alert.alert('Error', 'Please enter both email and password');
       return;
     }
 
-    try {
-      Alert.alert("Success", "Login attempt processed");
-    } catch (error) {
-      console.log(error);
-    }
+    login(
+      { email, password },
+      {
+        onError: (error) => {
+          console.error('Login error:', error);
+          Alert.alert(
+            'Login Failed',
+            error instanceof Error ? error.message : 'An error occurred during login'
+          );
+        },
+      }
+    );
   };
 
   const handleRegister = (url = "https://app.govacha.com/auth/register") => {
@@ -50,7 +62,7 @@ const Login = () => {
   };
 
   return (
-    <>
+    <PublicRoute>
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         className="flex-1 bg-gray-50"
@@ -140,11 +152,14 @@ const Login = () => {
 
             <TouchableOpacity
               onPress={handleLogin}
-              className="bg-primary py-3 rounded-md mb-6"
+              disabled={isLoading}
+              className="bg-primary py-4 rounded-2xl items-center mb-5"
             >
-              <Text className="text-white text-center font-semibold">
-                Log in
-              </Text>
+              {isLoading ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-white font-bold text-lg">Login</Text>
+              )}
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => handleRegister()}>
@@ -156,7 +171,7 @@ const Login = () => {
           </View>
 
           <View className="mt-8 items-center">
-            <Text className="text-gray-600 text-sm">© 2025 GovAcha</Text>
+            <Text className="text-gray-600 text-sm"> 2025 GovAcha</Text>
             <View className="flex-row mt-2">
               <TouchableOpacity>
                 <Text className="text-gray-600 text-sm mr-4">
@@ -172,35 +187,34 @@ const Login = () => {
             </Text>
           </View>
         </ScrollView>
-      </KeyboardAvoidingView>
-
-      <Modal
-        visible={showWebView}
-        animationType="slide"
-        onRequestClose={handleCloseWebView}
-      >
-        <View className="flex-1">
-          <View className="py-4 px-4 flex-row justify-between items-center">
-            <TouchableOpacity onPress={handleCloseWebView}>
-              <View className="flex-row items-center">
-                <Ionicons name="arrow-back" size={20} color="black" />{" "}
-                <Text className="text-black font-semibold ml-2 text-lg">
-                  Back
-                </Text>
-              </View>
-            </TouchableOpacity>
-            <View style={{ width: 50 }}></View>
+        <Modal
+          visible={showWebView}
+          animationType="slide"
+          onRequestClose={handleCloseWebView}
+        >
+          <View className="flex-1">
+            <View className="py-4 px-4 flex-row justify-between items-center">
+              <TouchableOpacity onPress={handleCloseWebView}>
+                <View className="flex-row items-center">
+                  <Ionicons name="arrow-back" size={20} color="black" />
+                  <Text className="text-black font-semibold ml-2 text-lg">
+                    Back
+                  </Text>
+                </View>
+              </TouchableOpacity>
+              <View style={{ width: 50 }} />
+            </View>
+            <WebView
+              source={{ uri: webViewUrl }}
+              style={{ flex: 1 }}
+              startInLoadingState={true}
+              javaScriptEnabled={true}
+              domStorageEnabled={true}
+            />
           </View>
-          <WebView
-            source={{ uri: webViewUrl }}
-            style={{ flex: 1 }}
-            startInLoadingState={true}
-            javaScriptEnabled={true}
-            domStorageEnabled={true}
-          />
-        </View>
-      </Modal>
-    </>
+        </Modal>
+      </KeyboardAvoidingView>
+    </PublicRoute>
   );
 };
 

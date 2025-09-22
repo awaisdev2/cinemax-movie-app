@@ -2,17 +2,54 @@
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
     "strict": true,
+    "baseUrl": ".",
     "paths": {
       "@/*": [
         "./*"
+      ],
+      "@/app/*": [
+        "./app/*"
+      ],
+      "@/contexts/*": [
+        "./contexts/*"
+      ],
+      "@/lib/*": [
+        "./lib/*"
       ]
-    }
+    },
+    "jsx": "react-native",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "jsxImportSource": "react",
+    "module": "esnext",
+    "target": "esnext",
+    "lib": [
+      "esnext"
+    ],
+    "allowJs": true,
+    "isolatedModules": true
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
+    "./app/**/*.ts",
+    "./app/**/*.tsx",
+    "./contexts/**/*.ts",
+    "./contexts/**/*.tsx",
+    "./lib/**/*.ts",
+    "./lib/**/*.tsx",
+    "global.d.ts",
+    "nativewind-env.d.ts",
     ".expo/types/**/*.ts",
-    "expo-env.d.ts",
-    "nativewind-env.d.ts"
+    "expo-env.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "**/__tests__/*",
+    "**/*.spec.ts",
+    "**/*.test.ts"
   ]
 }
