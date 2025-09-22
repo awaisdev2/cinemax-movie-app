@@ -1,99 +1,82 @@
-import { useIsFocused } from "@react-navigation/native";
-import { Link } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { Image, ScrollView, Text, View } from "react-native";
-import Animated, { FadeInUp } from "react-native-reanimated";
+import FeedForm from "@/components/feeds/FeedForm";
+import { useGetFeeds } from "@/queries/feeds";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  Modal,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import FeedIndexCard from "../../components/feeds/FeedIndexCard";
+import { useAuth } from "../../contexts/AuthContext";
 
-export default function Index() {
-  const isFocused = useIsFocused();
+export default function FeedsScreen() {
+  const { user } = useAuth();
+  const [showCreateFeedModal, setShowCreateFeedModal] = useState(false);
 
-  // A key that changes every time the screen is focused
-  const [key, setKey] = useState(0);
+  const { data: feedsData, isLoading } = useGetFeeds({
+    type: "public",
+  });
 
-  useEffect(() => {
-    if (isFocused) {
-      setKey((prev) => prev + 1);
-    }
-  }, [isFocused]);
+  if (isLoading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text className="mt-2 text-gray-500">Loading feeds...</Text>
+      </View>
+    );
+  }
 
   return (
-    <View className="flex-1 bg-gray-900 pt-10">
-      <ScrollView className="px-4">
-        {/* Hero Section */}
-        <View className="items-center my-10">
-          <Animated.View
-            key={`logo-${key}`}
-            entering={FadeInUp.delay(300).duration(800)}
-            className="w-36 h-36 bg-purple-600 rounded-full flex items-center justify-center mb-3"
-          >
+    <View className="flex-1 bg-gray-100 pt-12 pb-2">
+      <ScrollView className="py-4">
+        <View className="d-flex justify-content-center mx-4">
+          <View className="bg-white shadow-sm flex-row items-center px-4 py-3 mb-3 w-100 rounded-xl cursor-pointer">
             <Image
-              source={require("../../assets/images/logo.png")}
-              className="w-full h-full object-cover"
+              source={{ uri: user?.absoluteProfilePath }}
+              className="w-12 h-12 rounded-full"
             />
-          </Animated.View>
-
-          <Animated.Text
-            key={`title-${key}`}
-            entering={FadeInUp.delay(300).duration(800)}
-            className="text-4xl font-bold text-white text-center mb-2"
-          >
-            CineMax
-          </Animated.Text>
-
-          <Animated.Text
-            key={`subtitle-${key}`}
-            entering={FadeInUp.delay(600).duration(800)}
-            className="text-lg text-gray-300 text-center"
-          >
-            Your Ultimate Movie Experience
-          </Animated.Text>
+            <TouchableOpacity
+              onPress={() => setShowCreateFeedModal(true)}
+              className="p-2 rounded-xl"
+            >
+              <View className="border-0 mx-5 mt-1 w-full">
+                <Text className="font-semibold text-base text-[#807E7E]">
+                  What&apos;s on your mind?
+                </Text>
+              </View>
+            </TouchableOpacity>
+          </View>
         </View>
 
-        {/* Browse Movies Section */}
-        <Animated.View
-          key={`browse-${key}`}
-          entering={FadeInUp.delay(900).duration(800)}
-          className="mb-10"
-        >
-          <Text className="text-2xl font-bold text-white mb-4 text-center">
-            Browse Movies
-          </Text>
-          <Text className="text-gray-400 text-center mb-6 px-4">
-            Discover thousands of movies from all genres. Find your next
-            favorite film with our curated collections.
-          </Text>
-        </Animated.View>
-
-        {/* App Description */}
-        <Animated.View
-          key={`about-${key}`}
-          entering={FadeInUp.delay(1200).duration(800)}
-          className="bg-gray-800 p-6 rounded-xl mb-10"
-        >
-          <Text className="text-xl font-bold text-white mb-3 text-center">
-            About Our App
-          </Text>
-          <Text className="text-gray-300 text-center mb-4">
-            CineMax is your go-to destination for discovering, exploring, and
-            organizing your movie watching experience.
-          </Text>
-          <Text className="text-gray-300 text-center">
-            With personalized recommendations and detailed information about
-            every film, we make sure you never miss a great movie.
-          </Text>
-        </Animated.View>
-
-        {/* Get Started Button */}
-        <Animated.View
-          key={`button-${key}`}
-          entering={FadeInUp.delay(1500).duration(800)}
-          className="items-center mb-12"
-        >
-          <Link href="/about" className="mt-4">
-            <Text className="text-blue-400">Learn more about us</Text>
-          </Link>
-        </Animated.View>
+        <View className="px-4">
+          {feedsData?.feeds?.length > 0 ? (
+            feedsData?.feeds?.map((feed: any) => (
+              <FeedIndexCard key={feed.id} feed={feed} />
+            ))
+          ) : (
+            <View className="bg-white p-4 rounded-xl items-center">
+              <Text className="text-gray-500">No feeds available</Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
+
+      <Modal
+        visible={showCreateFeedModal}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setShowCreateFeedModal(false)}
+      >
+        <FeedForm
+          user={user}
+          setShowCreateFeedModal={setShowCreateFeedModal}
+          feedType={"public"}
+        />
+      </Modal>
     </View>
   );
 }

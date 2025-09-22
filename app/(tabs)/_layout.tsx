@@ -1,100 +1,42 @@
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import { Tabs } from "expo-router";
-import React from "react";
-import { ImageBackground, Text, View } from "react-native";
+import Feather from '@expo/vector-icons/Feather';
+import { Redirect, Tabs } from 'expo-router';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { useAuth } from '../../contexts/AuthContext';
 
-const TabIcons = ({
-  focused,
-  title,
-  icon,
-}: {
-  title: string;
-  focused: boolean;
-  icon: any;
-}) => {
-  if (!focused) {
+export default function TabLayout() {
+  const { user, isLoading } = useAuth();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient || isLoading) {
     return (
-      <View className="size-full justify-center items-center mt-4 rounded-full">
-        <MaterialCommunityIcons name={icon} size={24} color="white" />
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" />
       </View>
     );
   }
 
-  return (
-    <ImageBackground
-      source={require("../../assets/images/highlight.png")}
-      className="flex flex-row w-full flex-1 items-center justify-center overflow-hidden rounded-full mt-4 min-h-14 min-w-[100px]"
-    >
-      <MaterialCommunityIcons
-        name={icon}
-        size={24}
-        color="white"
-      />
-      <Text className="text-white font-bold text-center ml-1">{title}</Text>
-    </ImageBackground>
-  );
-};
+  if (!user) {
+    return <Redirect href="/auth/login" />;
+  }
 
-export default function TabLayout() {
   return (
-    <Tabs
-      screenOptions={{
-        tabBarShowLabel: false,
-        tabBarItemStyle: {
-          width: "100%",
-          height: "100%",
-          justifyContent: "center",
-          alignItems: "center",
-        },
-        tabBarStyle: {
-          backgroundColor: "#2d285d",
-          borderRadius: 50,
-          marginHorizontal: 20,
-          marginBottom: 36,
-          height: 52,
-          position: "absolute",
-          overflow: "hidden",
-          borderWidth: 1,
-          borderColor: "#2d285d",
-        },
-      }}
-    >
+    <Tabs>
       <Tabs.Screen
         name="index"
         options={{
-          title: "Home",
           headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            TabIcons({ focused, title: "Home", icon: "home" }),
+          title: 'Community',
+          tabBarIcon: ({ color }) => (
+            <Feather name="users" size={24} color={color} />
+          ),
         }}
       />
-      <Tabs.Screen
-        name="movies"
-        options={{
-          title: "Movies",
-          headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            TabIcons({ focused, title: "Movies", icon: "movie" }),
-        }}
-      />
-      <Tabs.Screen
-        name="search"
-        options={{
-          title: "Search",
-          headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            TabIcons({ focused, title: "Search", icon: "magnify" }),
-        }}
-      />
-      <Tabs.Screen
-        name="about"
-        options={{
-          title: "About",
-          headerShown: false,
-          tabBarIcon: ({ focused }) =>
-            TabIcons({ focused, title: "About", icon: "information-outline" }),
-        }}
-      />
+      {/* Add more tabs as needed */}
     </Tabs>
   );
 }

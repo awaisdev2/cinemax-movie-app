@@ -1,0 +1,5 @@
+export const FEEDS_QUERY_KEY = 'feeds'
+export const TRENDING_FEEDS_QUERY_KEY = 'trending_feeds'
+export const FEED_BY_ID_QUERY_KEY = 'feed_by_id'
+export const COMMENTS_QUERY_KEY = 'comments'
+export const CATEGORIES_QUERY_KEY = 'categories'
